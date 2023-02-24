@@ -1,0 +1,3 @@
+[submodule "cpp-mjpeg-streamer"]
+	path = cpp-mjpeg-streamer
+	url = https://github.com/nadjieb/cpp-mjpeg-streamer
