@@ -3,3 +3,4 @@ build/
 .cache/
 *-params.txt
 __pycache__/
+mode

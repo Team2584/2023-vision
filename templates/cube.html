@@ -1,8 +1,10 @@
 {% extends "layout.html" %}
 
+{% block title %} Vision Tuning: Cubes {% endblock %}
+
 {% block body %}
 
-<title class="title">Cube Tuner</title>
+<a class="mt-1 ms-1 float-start btn btn-primary" href="/">Go Back</a>
 <h1><center>Cube Tuner</center></h1>
 <style>
   .top_column {
@@ -96,6 +98,11 @@
 </div>
 
 <script>
+
+  window.onbeforeunload = function(evt) {
+    fetch("{{url_for("runvision")}}", {method: "POST"});
+  }
+
   var sliderData = {};
 
   // Get initial values
@@ -163,5 +170,6 @@
     });
   }
 </script>
+
 
 {% endblock %}

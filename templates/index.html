@@ -1,0 +1,23 @@
+{% extends "layout.html" %}
+
+{% block title %} Jetson Web Interface {% endblock %}
+
+{% block body %}
+<script>
+    function restartCode()
+    {
+        fetch("{{url_for("restart_code")}}", {method: "POST"});
+    }
+</script>
+<div class="container ms-1">
+<h1>Jetson Web Interface</h1>
+<img class="rounded img-fluid" src="http://10.25.84:8080/colorFrame" />
+<img class="rounded img-fluid" src="http://10.25.84:8080/tagCam" />
+
+<br/>
+<br/>
+
+<a class="btn btn-primary" href="{{url_for("tune")}}">Tune Vision Params</a>
+<button type="button" class="btn btn-danger" onclick="restartCode()">Restart Code</button>
+</div>
+{% endblock %}
