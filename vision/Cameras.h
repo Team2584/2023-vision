@@ -13,6 +13,7 @@
 // Aliases for depth camera serial numbers; color-coded with tape on each physical camera
 #define DEPTH_BLUE "017322071728"
 #define DEPTH_RED "939622072805"
+#define DEPTH_YELLOW "025222072169"
 
 #define INCH 39.37
 

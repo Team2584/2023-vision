@@ -4,7 +4,6 @@
 #include "globals.h"
 #include "graphics_helpers.h"
 #include "pose_estimation.h"
-#define depth_blank "025222072169"
 
 using namespace std;
 using namespace cv;
@@ -271,11 +270,11 @@ int main()
         // http://localhost:8080/bgr
         vector<uchar> buf_bgr;
         imencode(".jpg", depth.colorFrame, buf_bgr, params);
-        streamer.publish("/depth", string(buf_bgr.begin(), buf_bgr.end()));
+        streamer.publish("/colorFrame", string(buf_bgr.begin(), buf_bgr.end()));
 
         vector<uchar> buf_tags;
         imencode(".jpg", tagCam.colorFrame, buf_tags, params);
-        streamer.publish("/tags", string(buf_tags.begin(), buf_tags.end()));
+        streamer.publish("/tagCam", string(buf_tags.begin(), buf_tags.end()));
 
         // Make sure each loop takes at least 10 ms (for streamer library)
         auto loop_time =
