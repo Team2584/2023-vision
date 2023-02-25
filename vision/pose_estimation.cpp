@@ -334,8 +334,7 @@ void getRobotPosition(apriltag_detection_t *det, robot_position *pos, camInfo *c
     double y = point(1);
     double z = -point(2);
 
-    // TODO CHANGE TO SUBSTATION TAG IDS
-    if (det->id == 3)
+    if (det->id == 4 || det->id == 5)
     {
         x *= -1;
         y *= -1;
