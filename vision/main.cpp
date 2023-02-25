@@ -124,7 +124,7 @@ int main()
     vector<int> cubeParams;
 
     string line;
-    ifstream coneFile("../../../tune-vision/cone-params.txt");
+    ifstream coneFile("/home/patriotrobotics/Documents/vision/cone-params.txt");
     for (int i = 0; i < 6; i++)
     {
         if (coneFile)
@@ -148,7 +148,7 @@ int main()
         cout << "cone_max_val " << cone_max_val << endl << endl;
     }
 
-    ifstream cubeFile("../../../tune-vision/cube-params.txt");
+    ifstream cubeFile("/home/patriotrobotics/Documents/vision/cube-params.txt");
     for (int i = 0; i < 6; i++)
     {
         if (coneFile)
