@@ -1,3 +1,5 @@
 *.o
 build/
 .cache/
+*-params.txt
+__pycache__/

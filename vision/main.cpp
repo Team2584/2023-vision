@@ -181,6 +181,8 @@ int main()
 
     while (true)
     {
+        chrono::time_point loop_start = chrono::steady_clock::now();
+
         if (!connectedSub.Get())
         {
             printf("Reconnecting...\n");
@@ -275,13 +277,15 @@ int main()
         imencode(".jpg", tagCam.colorFrame, buf_tags, params);
         streamer.publish("/tags", string(buf_tags.begin(), buf_tags.end()));
 
-        if (waitKey(10) == 'q')
-            break;
+        // Make sure each loop takes at least 10 ms (for streamer library)
+        auto loop_time =
+            chrono::duration_cast<chrono::milliseconds>(chrono::steady_clock::now() - loop_start);
+        if (loop_time.count() < 10)
+            this_thread::sleep_for(chrono::milliseconds(10 - loop_time.count()));
     }
 
     apriltag_detector_destroy(td);
     tag16h5_destroy(tf);
-    destroyAllWindows();
     streamer.stop();
 
     return 0;

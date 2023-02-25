@@ -11,8 +11,8 @@ opencv_deps = [
                cc.find_library('opencv_rgbd', required: true, dirs: opencv_dirs),
                cc.find_library('opencv_video', required: true, dirs: opencv_dirs),
                cc.find_library('opencv_imgproc', required: true, dirs: opencv_dirs),
-               cc.find_library('opencv_plot', required: true, dirs: opencv_dirs),
-               cc.find_library('opencv_highgui', required: true, dirs: opencv_dirs),
+               # cc.find_library('opencv_plot', required: true, dirs: opencv_dirs),
+               # cc.find_library('opencv_highgui', required: true, dirs: opencv_dirs),
                cc.find_library('opencv_imgcodecs', required: true, dirs: opencv_dirs),
               ]
 opencv_inc = include_directories('/usr/include/opencv4')
@@ -43,16 +43,20 @@ stream_incs = [
 
 # THE REAL STUFF
 
-src = [
-       'main.cpp',
-       'pose_estimation.cpp',
-       'detection.cpp',
-       'Cameras.cpp',
-       'flirCamera.cpp',
-       'depthCamera.cpp',
-       'usbCamera.cpp',
-       'graphics_helpers.cpp',
+vision_src = [
+       'vision/main.cpp',
+       'vision/pose_estimation.cpp',
+       'vision/detection.cpp',
+       'vision/Cameras.cpp',
+       'vision/flirCamera.cpp',
+       'vision/depthCamera.cpp',
+       'vision/usbCamera.cpp',
+       'vision/graphics_helpers.cpp',
       ]
+
+tune_src = [
+            'tune/src/tune.cpp'
+           ]
 
 deps = [
         opencv_deps,
@@ -72,7 +76,13 @@ inc = [
       ]
 
 executable('runvision',
-           sources : src,
+           sources : vision_src,
+           dependencies : deps,
+           include_directories : inc,
+           cpp_args : ['-Wno-deprecated', '-Wno-non-virtual-dtor', '-Wno-psabi'])
+
+executable('tune',
+           sources : tune_src,
            dependencies : deps,
            include_directories : inc,
            cpp_args : ['-Wno-deprecated', '-Wno-non-virtual-dtor', '-Wno-psabi'])

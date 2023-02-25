@@ -5,9 +5,6 @@
 using namespace std;
 using namespace cv;
 
-int cksize = 30;
-int oksize = 6;
-
 depthCamera::depthCamera(string camSerial, int width, int height, int fps)
     : pipe{}, cfg{}, prof{}, align{RS2_STREAM_COLOR}, rs_colorFrame{nullptr},
       rs_depthFrame{nullptr}, colorFrame{cv::Size(width, height), CV_8UC3},
@@ -202,12 +199,10 @@ std::pair<double, double> depthCamera::findCubes()
 
     // Morphological open to get rid of nonsense
     Mat morphedMask;
-    createTrackbar("open kernel size", "depth_red", &oksize, 50);
-    createTrackbar("close kernel size", "depth_red", &cksize, 50);
-    Mat openKernel = getStructuringElement(MORPH_RECT, Size(oksize, oksize));
+    Mat openKernel = getStructuringElement(MORPH_RECT, Size(6, 6));
     morphologyEx(mask, morphedMask, MORPH_OPEN, openKernel);
 
-    Mat closeKernel = getStructuringElement(MORPH_RECT, Size(cksize, cksize));
+    Mat closeKernel = getStructuringElement(MORPH_RECT, Size(30, 30));
     morphologyEx(morphedMask, morphedMask, MORPH_CLOSE, closeKernel);
 
     // imshow("mask", morphedMask);

@@ -1,0 +1,167 @@
+{% extends "layout.html" %}
+
+{% block body %}
+
+<title class="title">Cone Tuner</title>
+<h1><center>Cone Tuner</center></h1>
+<style>
+    .top_column {
+        float: left;
+        width: 320;
+        padding: 20px;
+    }
+
+    .row1::after {
+        content: "";
+        clear: both;
+        display: table;
+    }
+
+    .bottom_column {
+        float: left;
+        width: 320;
+        padding: 20px;
+    }
+
+    .row2::after {
+        content: "";
+        clear: both;
+        display: table;
+        padding: 5px;
+    }
+</style>
+<div class="row1">
+    <div class="top_column">
+        <h2><center>Raw Image</center></h2>
+        <br />
+        <img
+            class="original_image"
+            src="http://10.25.84.6:8080/colorFrame"
+            alt="Full_Image"
+            width="320"
+            height="240"
+        />
+    </div>
+    <div class="top_column">
+        <h2><center>Only Cone</center></h2>
+        <br />
+        <img
+            class="original_image"
+            src="http://10.25.84.6:8080/justCone"
+            alt="Full_Image"
+            width="320"
+            height="240"
+        />
+        <br />
+    </div>
+</div>
+
+<div class="row2">
+    <div class="bottom_column">
+        <img
+            class="original_image"
+            src="http://10.25.84.6:8080/coneHueMask"
+            alt="Full_Image"
+            width="320"
+            height="240"
+        />
+        <h2><center>Hue</center></h2>
+        <br /><br />
+        <div id="hueSlider" class="hueSlider" style="width: 320px"></div>
+    </div>
+    <div class="bottom_column">
+        <img
+            class="original_image"
+            src="http://10.25.84.6:8080/coneSatMask"
+            alt="Full_Image"
+            width="320"
+            height="240"
+        />
+        <h2><center>Saturation</center></h2>
+        <br /><br />
+        <div id="satSlider" class="satSlider" style="width: 320px"></div>
+    </div>
+    <div class="bottom_column">
+        <img
+            class="original_image"
+            src="http://10.25.84.6:8080/coneValMask"
+            alt="Full_Image"
+            width="320"
+            height="240"
+        />
+        <h2><center>Value</center></h2>
+        <br /><br />
+        <div id="valSlider" class="valSlider" style="width: 320px"></div>
+    </div>
+</div>
+
+<script>
+    var sliderData = {};
+
+    // Get initial values
+
+    var hueSlider = document.getElementById('hueSlider');
+    var satSlider = document.getElementById('satSlider');
+    var valSlider = document.getElementById('valSlider');
+    var sliders = [hueSlider, satSlider, valSlider];
+
+    noUiSlider.create(hueSlider, {
+      start: [{{hue_min}}, {{hue_max}}],
+      connect: true,
+      tooltips: wNumb({decimals: 0}),
+      step: 1,
+      range: {
+          min: 0,
+          max: 179,
+      },
+    });
+
+    noUiSlider.create(satSlider, {
+      start: [{{sat_min}}, {{sat_max}}],
+      connect: true,
+      tooltips: wNumb({decimals: 0}),
+      step: 1,
+      range: {
+          min: 0,
+          max: 255,
+      },
+    });
+
+    noUiSlider.create(valSlider, {
+      start: [{{val_min}}, {{val_max}}],
+      connect: true,
+      tooltips: wNumb({decimals: 0}),
+      step: 1,
+      range: {
+          min: 0,
+          max: 255,
+      },
+    });
+
+    sliders.forEach(function(slider) {
+        slider.noUiSlider.on('update', function() {
+        sliderData['hue-min'] = hueSlider.noUiSlider.get()[0];
+        sliderData['hue-max'] = hueSlider.noUiSlider.get()[1];
+
+        sliderData['sat-min'] = satSlider.noUiSlider.get()[0];
+        sliderData['sat-max'] = satSlider.noUiSlider.get()[1];
+
+        sliderData['val-min'] = valSlider.noUiSlider.get()[0];
+        sliderData['val-max'] = valSlider.noUiSlider.get()[1];
+        sendVals();
+      });
+    });
+
+    function sendVals()
+    {
+      fetch("{{url_for("send_cones")}}", {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(sliderData),
+      });
+    }
+</script>
+
+{% endblock %}
