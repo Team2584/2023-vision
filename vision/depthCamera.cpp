@@ -85,7 +85,16 @@ double getObjectDepth(vector<Point> objContour, Mat depths)
     drawContours(objMask, vector<vector<Point>>(1, objContour), -1, 255, -1);
     Mat kernel = getStructuringElement(MORPH_RECT, Size(5, 5));
     erode(objMask, objMask, kernel, Point(-1, -1), 3);
+
+    /*
+    Mat sel_depths;
+    bitwise_and(depths, objMask, sel_depths);
+    double sum = (double)cv::sum(sel_depths)[0];
+
+    double depth = sum / countNonZero(sel_depths);
+    */
     double depth = mean(depths, objMask)[0];
+
     return depth;
 }
 
@@ -122,21 +131,21 @@ std::pair<double, double> depthCamera::findCones()
     if (boundBoxes.size() == 0)
         return pair(0, 0);
 
-    // Pick the closest cone
-    double dist = 4000000;
+    // Pick the largest cone
+    double area;
     int selected = 0;
     for (unsigned int i = 0; i < coneContours.size(); i++)
     {
-        double newDist = getObjectDepth(coneContours[i], depthFrame);
-        if (newDist < dist)
+        double newArea = boundBoxes[i].width * boundBoxes[i].height;
+        if (newArea > area)
         {
-            dist = newDist;
+            area = newArea;
             selected = i;
         }
     }
 
     vector<Point> bestContour = coneContours[selected];
-    double bestDist = dist * depthUnit;
+    double bestDist = getObjectDepth(bestContour, depthFrame) * depthUnit;
     drawContours(colorFrame, vector<vector<Point>>(1, bestContour), -1, Scalar(0, 255, 0), 7);
 
     Rect bestBox = boundBoxes[selected];
