@@ -93,8 +93,11 @@ int main()
     nt::BooleanSubscriber connectedSub = connectedTopic.Subscribe(false);
 
     // Other vision topics
-    nt::DoubleArrayTopic robot_pose_Topic = visionTbl->GetDoubleArrayTopic("poseArray");
-    nt::DoubleArrayEntry robot_pose_Entry = robot_pose_Topic.GetEntry({});
+    nt::DoubleArrayTopic cube_tag_Topic = visionTbl->GetDoubleArrayTopic("cubeTag");
+    nt::DoubleArrayEntry cube_tag_Entry = cube_tag_Topic.GetEntry({});
+
+    nt::DoubleArrayTopic substation_tag_Topic = visionTbl->GetDoubleArrayTopic("substationTag");
+    nt::DoubleArrayEntry substation_tag_Entry = substation_tag_Topic.GetEntry({});
 
     nt::BooleanTopic see_cones_Topic = visionTbl->GetBooleanTopic("seeCones");
     nt::BooleanSubscriber see_cones_Sub = see_cones_Topic.Subscribe({true});
@@ -102,8 +105,11 @@ int main()
     nt::BooleanTopic see_cubes_Topic = visionTbl->GetBooleanTopic("seeCubes");
     nt::BooleanSubscriber see_cubes_Sub = see_cubes_Topic.Subscribe({true});
 
-    nt::BooleanTopic see_tags_Topic = visionTbl->GetBooleanTopic("seeTags");
-    nt::BooleanSubscriber see_tags_Sub = see_tags_Topic.Subscribe({true});
+    nt::BooleanTopic see_cube_tags_Topic = visionTbl->GetBooleanTopic("seeCubeTags");
+    nt::BooleanSubscriber see_cube_tags_Sub = see_cube_tags_Topic.Subscribe({true});
+
+    nt::BooleanTopic see_substation_tags_Topic = visionTbl->GetBooleanTopic("seeSubstationTags");
+    nt::BooleanSubscriber see_substation_tags_Sub = see_substation_tags_Topic.Subscribe({true});
 
     nt::DoubleArrayTopic cone_pos_Topic = visionTbl->GetDoubleArrayTopic("conePos");
     nt::DoubleArrayPublisher cone_pos_Pub = cone_pos_Topic.Publish();
@@ -208,7 +214,28 @@ int main()
             continue;
         }
 
-        if (see_tags_Sub.Get())
+        if (see_cube_tags_Sub.Get())
+        {
+            std::vector<robot_position> poses =
+                getPoses(depth.grayFrame, depth.colorFrame, &depth.info, td);
+
+            for (unsigned int i = 0; i < poses.size(); i++)
+            {
+                robot_position pos = poses[i];
+                cout << "X: " << pos.x * INCH << endl;
+                cout << "Y: " << pos.y * INCH << endl;
+                cout << "Z: " << pos.z * INCH << endl << endl;
+                cout << "Theta: " << pos.theta << endl;
+
+                double micros = time_since(frameTime);
+                vector<double> poseVector = {pos.x, pos.y, pos.z, pos.theta, micros, poseNum};
+                cube_tag_Entry.Set(poseVector);
+                nt_inst.Flush();
+                poseNum++;
+            }
+        }
+
+        if (see_substation_tags_Sub.Get())
         {
             std::vector<robot_position> poses =
                 getPoses(tagCam.grayFrame, tagCam.colorFrame, &tagCam.info, td);
@@ -223,7 +250,7 @@ int main()
 
                 double micros = time_since(frameTime);
                 vector<double> poseVector = {pos.x, pos.y, pos.z, pos.theta, micros, poseNum};
-                robot_pose_Entry.Set(poseVector);
+                substation_tag_Entry.Set(poseVector);
                 nt_inst.Flush();
                 poseNum++;
             }
