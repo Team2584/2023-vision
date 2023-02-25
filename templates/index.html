@@ -7,11 +7,12 @@
     function restartCode()
     {
         fetch("{{url_for("restart_code")}}", {method: "POST"});
+        setTimeout(function() {window.location.reload()}, 5000);
     }
 </script>
 <div class="container ms-1">
 <h1>Jetson Web Interface</h1>
-<img class="rounded img-fluid" src="http://10.25.84:8080/colorFrame" />
+<img class="rounded img-fluid" src="http://192.168.1.24:8080/colorFrame" />
 <img class="rounded img-fluid" src="http://10.25.84:8080/tagCam" />
 
 <br/>
