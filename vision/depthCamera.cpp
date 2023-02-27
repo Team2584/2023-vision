@@ -131,15 +131,15 @@ std::pair<double, double> depthCamera::findCones()
     if (boundBoxes.size() == 0)
         return pair(0, 0);
 
-    // Pick the largest cone
-    double area;
+    // Pick the lowest (closest) cone
+    int height = 0;
     int selected = 0;
     for (unsigned int i = 0; i < coneContours.size(); i++)
     {
-        double newArea = boundBoxes[i].width * boundBoxes[i].height;
-        if (newArea > area)
+        int newHeight = boundBoxes[i].height;
+        if (newHeight > height) // because y is increasing down
         {
-            area = newArea;
+            height = newHeight;
             selected = i;
         }
     }
