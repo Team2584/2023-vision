@@ -122,6 +122,7 @@ class depthCamera : public abstractCamera
 
     void setManualExposure(int exposuretime);
     void setAutoExposure();
+    void setLaser(bool on);
     void getFrame();
     std::pair<double, double> findCones();
     std::pair<double, double> findCubes();

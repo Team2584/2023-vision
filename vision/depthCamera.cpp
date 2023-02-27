@@ -31,6 +31,14 @@ depthCamera::~depthCamera()
 {
 }
 
+void depthCamera::setLaser(bool on)
+{
+    if (on)
+        prof.get_device().first<rs2::depth_sensor>().set_option(RS2_OPTION_EMITTER_ENABLED, 1.f);
+    else
+        prof.get_device().first<rs2::depth_sensor>().set_option(RS2_OPTION_EMITTER_ENABLED, 0.f);
+}
+
 void depthCamera::setManualExposure(int exposuretime)
 {
     // TODO impl
