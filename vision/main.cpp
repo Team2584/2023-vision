@@ -26,26 +26,57 @@ int cube_max_sat;
 int cube_min_val;
 int cube_max_val;
 
+bool has_depth = true;
+bool has_tagCam = true;
+
 int main()
 {
     /**********************************************************************************************
      * Camera & Stream Setup *
      *************************/
 
-    depthCamera depth(DEPTH_RED, 640, 480, 60);
-    depth.setPosOffset(1 / INCH, 5 / INCH, 23.5 / INCH, 0, -0.349);
-    // Blue camera settings
+    depthCamera *depth;
+    try
+    {
+        depthCamera depth_obj(DEPTH_YELLOW, 640, 480, 60);
+        depth = &depth_obj;
+    }
+    catch (const rs2::error &err)
+    {
+        cout << "RS2 ERROR CAUGHT: " << err.what() << endl;
+        has_depth = false;
+    }
+
+    if (has_depth)
+    {
+        depth->setPosOffset(1 / INCH, 5 / INCH, 23.5 / INCH, 0, -0.349);
+        // Red camera settings
+        depth->setCamParams(599, 600, 334, 236);
+    }
+
+    depthCamera *tagCam;
+    try
+    {
+        depthCamera tagCam_obj(DEPTH_RED, 640, 480, 60);
+        tagCam = &tagCam_obj;
+    }
+    catch (const rs2::error &err)
+    {
+        cout << "RS2 ERROR CAUGHT: " << err.what() << endl;
+        has_tagCam = false;
+    }
+
+    if (has_tagCam)
+    {
+        tagCam->setPosOffset(1 / INCH, -2 / INCH, 23.5 / INCH, 0, -0.349);
+        tagCam->setCamParams(608, 608, 323, 245);
+        tagCam->setDistCoeffs(0.09116903370720442, 0.2567349843314421, -0.003936586357063021,
+                              0.001658039412119442, -1.633408316803933);
+    }
+
     vector<int> params = {IMWRITE_JPEG_QUALITY, 80};
     mjpgs streamer;
     streamer.start(8080);
-    // Red camera settings
-    depth.setCamParams(599, 600, 334, 236);
-
-    depthCamera tagCam(DEPTH_BLUE, 640, 480, 60);
-    tagCam.setPosOffset(1 / INCH, -2 / INCH, 23.5 / INCH, 0, -0.349);
-    tagCam.setCamParams(608, 608, 323, 245);
-    tagCam.setDistCoeffs(0.09116903370720442, 0.2567349843314421, -0.003936586357063021,
-                         0.001658039412119442, -1.633408316803933);
 
     /**********************************************************************************************
      * AprilTags Setup *
@@ -204,9 +235,12 @@ int main()
         sanitycheckEntry.Set(counter);
         counter++;
 
-        depth.getFrame();
+        if (has_depth)
+            depth->getFrame();
         chrono::time_point frameTime = chrono::steady_clock::now();
-        tagCam.getFrame();
+
+        if (has_tagCam)
+            tagCam->getFrame();
 
         if (errno == EAGAIN)
         {
@@ -214,73 +248,82 @@ int main()
             continue;
         }
 
-        if (see_cube_tags_Sub.Get())
+        if (has_depth)
         {
-            std::vector<robot_position> poses =
-                getPoses(depth.grayFrame, depth.colorFrame, &depth.info, td);
-
-            for (unsigned int i = 0; i < poses.size(); i++)
+            if (see_cube_tags_Sub.Get())
             {
-                robot_position pos = poses[i];
-                cout << "X: " << pos.x * INCH << endl;
-                cout << "Y: " << pos.y * INCH << endl;
-                cout << "Z: " << pos.z * INCH << endl << endl;
-                cout << "Theta: " << pos.theta << endl;
+                std::vector<robot_position> poses =
+                    getPoses(depth->grayFrame, depth->colorFrame, &(depth->info), td);
 
-                double micros = time_since(frameTime);
-                vector<double> poseVector = {pos.x, pos.y, pos.z, pos.theta, micros, poseNum};
-                cube_tag_Entry.Set(poseVector);
-                nt_inst.Flush();
-                poseNum++;
+                for (unsigned int i = 0; i < poses.size(); i++)
+                {
+                    robot_position pos = poses[i];
+                    cout << "X: " << pos.x * INCH << endl;
+                    cout << "Y: " << pos.y * INCH << endl;
+                    cout << "Z: " << pos.z * INCH << endl << endl;
+                    cout << "Theta: " << pos.theta << endl;
+
+                    double micros = time_since(frameTime);
+                    vector<double> poseVector = {pos.x, pos.y, pos.z, pos.theta, micros, poseNum};
+                    cube_tag_Entry.Set(poseVector);
+                    nt_inst.Flush();
+                    poseNum++;
+                }
             }
         }
 
-        if (see_substation_tags_Sub.Get())
+        if (has_tagCam)
         {
-            std::vector<robot_position> poses =
-                getPoses(tagCam.grayFrame, tagCam.colorFrame, &tagCam.info, td);
-
-            for (unsigned int i = 0; i < poses.size(); i++)
+            if (see_substation_tags_Sub.Get())
             {
-                robot_position pos = poses[i];
-                cout << "X: " << pos.x * INCH << endl;
-                cout << "Y: " << pos.y * INCH << endl;
-                cout << "Z: " << pos.z * INCH << endl << endl;
-                cout << "Theta: " << pos.theta << endl;
+                std::vector<robot_position> poses =
+                    getPoses(tagCam->grayFrame, tagCam->colorFrame, &tagCam->info, td);
 
-                double micros = time_since(frameTime);
-                vector<double> poseVector = {pos.x, pos.y, pos.z, pos.theta, micros, poseNum};
-                substation_tag_Entry.Set(poseVector);
-                nt_inst.Flush();
-                poseNum++;
+                for (unsigned int i = 0; i < poses.size(); i++)
+                {
+                    robot_position pos = poses[i];
+                    cout << "X: " << pos.x * INCH << endl;
+                    cout << "Y: " << pos.y * INCH << endl;
+                    cout << "Z: " << pos.z * INCH << endl << endl;
+                    cout << "Theta: " << pos.theta << endl;
+
+                    double micros = time_since(frameTime);
+                    vector<double> poseVector = {pos.x, pos.y, pos.z, pos.theta, micros, poseNum};
+                    substation_tag_Entry.Set(poseVector);
+                    nt_inst.Flush();
+                    poseNum++;
+                }
             }
         }
 
-        if (see_cones_Sub.Get())
+        if (has_depth)
         {
-            // Print & send cone info
-            pair<double, double> conePos = depth.findCones();
-            cout << "Cone X: " << conePos.first << endl;
-            cout << "Cone Y: " << conePos.second << endl;
-            double micros = time_since(frameTime);
-            vector<double> coneVector = {conePos.first, conePos.second, micros, coneNum};
-            cone_pos_Pub.Set(coneVector);
-        }
+            if (see_cones_Sub.Get())
+            {
+                // Print & send cone info
+                pair<double, double> conePos = depth->findCones();
+                cout << "Cone X: " << conePos.first << endl;
+                cout << "Cone Y: " << conePos.second << endl;
+                double micros = time_since(frameTime);
+                vector<double> coneVector = {conePos.first, conePos.second, micros, coneNum};
+                cone_pos_Pub.Set(coneVector);
+            }
 
-        if (see_cubes_Sub.Get())
-        {
-            // Print & send cube info
-            pair<double, double> cubePos = depth.findCubes();
-            cout << "Cube X: " << cubePos.first << endl;
-            cout << "Cube Y: " << cubePos.second << endl << endl;
-            double micros = time_since(frameTime);
-            vector<double> cubeVector = {cubePos.first, cubePos.second, micros, coneNum};
-            cube_pos_Pub.Set(cubeVector);
+            if (see_cubes_Sub.Get())
+            {
+                // Print & send cube info
+                pair<double, double> cubePos = depth->findCubes();
+                cout << "Cube X: " << cubePos.first << endl;
+                cout << "Cube Y: " << cubePos.second << endl << endl;
+                double micros = time_since(frameTime);
+                vector<double> cubeVector = {cubePos.first, cubePos.second, micros, coneNum};
+                cube_pos_Pub.Set(cubeVector);
+            }
         }
 
         // Print & send pole info
         /*
-        pair<double, double> polePos = depth.findPoles();
+        pair<double, double> polePos = depth->findPoles();
         cout << "Pole X: " << polePos.first << endl;
         cout << "Pole Y: " << polePos.second << endl;
         ms = time_since(frameTime);
@@ -291,17 +334,22 @@ int main()
         nt_inst.Flush();
 
         // Graphics stuff
-        // drawMargins(depth.colorFrame);
+        // drawMargins(depth->colorFrame);
 
         // streamer
-        // http://localhost:8080/bgr
-        vector<uchar> buf_bgr;
-        imencode(".jpg", depth.colorFrame, buf_bgr, params);
-        streamer.publish("/colorFrame", string(buf_bgr.begin(), buf_bgr.end()));
+        if (has_depth)
+        {
+            vector<uchar> buf_bgr;
+            imencode(".jpg", depth->colorFrame, buf_bgr, params);
+            streamer.publish("/colorFrame", string(buf_bgr.begin(), buf_bgr.end()));
+        }
 
-        vector<uchar> buf_tags;
-        imencode(".jpg", tagCam.colorFrame, buf_tags, params);
-        streamer.publish("/tagCam", string(buf_tags.begin(), buf_tags.end()));
+        if (has_tagCam)
+        {
+            vector<uchar> buf_tags;
+            imencode(".jpg", tagCam->colorFrame, buf_tags, params);
+            streamer.publish("/tagCam", string(buf_tags.begin(), buf_tags.end()));
+        }
 
         // Make sure each loop takes at least 10 ms (for streamer library)
         auto loop_time =

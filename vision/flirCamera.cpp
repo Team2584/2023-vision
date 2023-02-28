@@ -3,12 +3,16 @@
 using namespace std;
 using namespace cv;
 
-flirCamera::flirCamera(int camNum)
-    : colorFrame{cv::Size(width, height), CV_8UC3}, grayFrame{cv::Size(width, height), CV_8UC1}
+flirCamera::flirCamera(std::string camSerial)
+    : flirSystem{}, flirCamList{},
+      colorFrame{cv::Size(width, height), CV_8UC3}, grayFrame{cv::Size(width, height), CV_8UC1}
 {
     using namespace Spinnaker;
     using namespace Spinnaker::GenApi;
     using namespace Spinnaker::GenICam;
+
+    flirSystem = Spinnaker::System::GetInstance();
+    flirCamList = flirSystem->GetCameras();
 
     const int numCameras = flirCamList.GetSize();
 
@@ -26,14 +30,8 @@ flirCamera::flirCamera(int camNum)
         // TODO throw
     }
 
-    if (numCameras < camNum)
-    {
-        cout << "Unable to access specified camera" << endl;
-        // TODO throw
-    }
-
     // Select camera
-    pCam = flirCamList.GetByIndex(camNum);
+    pCam = flirCamList.GetBySerial(camSerial);
     pCam->Init();
 
     // Retrieve GenICam nodemap

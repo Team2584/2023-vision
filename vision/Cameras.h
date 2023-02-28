@@ -14,6 +14,8 @@
 #define DEPTH_BLUE "017322071728"
 #define DEPTH_RED "939622072805"
 #define DEPTH_YELLOW "025222072169"
+// Same deal for flir
+#define FLIR_BLUE "20250399"
 
 #define INCH 39.37
 
@@ -77,8 +79,8 @@ class flirCamera : public abstractCamera
 {
   private:
     // Flir camera globals
-    Spinnaker::SystemPtr flirSystem = Spinnaker::System::GetInstance();
-    Spinnaker::CameraList flirCamList = flirSystem->GetCameras();
+    Spinnaker::SystemPtr flirSystem;
+    Spinnaker::CameraList flirCamList;
     Spinnaker::CameraPtr pCam = nullptr;
     int width = 720;
     int height = 540;
@@ -88,7 +90,7 @@ class flirCamera : public abstractCamera
     cv::Mat colorFrame;
     cv::Mat grayFrame;
 
-    flirCamera(int camNum);
+    flirCamera(std::string camSerial);
     ~flirCamera();
 
     void setManualGain(double value);

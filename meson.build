@@ -38,8 +38,16 @@ spin_incs = [
             ]
 
 stream_incs = [
-               include_directories('./cpp-mjpeg-streamer/single_include/')
+               include_directories('./cpp-mjpeg-streamer/single_include/'),
               ]
+
+realsense_deps = [
+                  cc.find_library('realsense2', dirs: '/usr/local/lib/realsense2/', required: true),
+                 ]
+
+realsense_incs = [
+                  include_directories('/usr/local/include/librealsense2/'),
+                 ]
 
 # THE REAL STUFF
 
@@ -60,7 +68,7 @@ tune_src = [
 
 deps = [
         opencv_deps,
-        dependency('realsense2'),
+        realsense_deps,
         dependency('eigen3'),
         dependency('apriltag'),
         dependency('Threads'),
@@ -69,6 +77,7 @@ deps = [
        ]
 
 inc = [
+       realsense_incs,
        opencv_inc,
        wpi_incs,
        spin_incs,
