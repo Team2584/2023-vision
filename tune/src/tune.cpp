@@ -38,7 +38,7 @@ int main(void)
 
     vector<int> stream_params = {IMWRITE_JPEG_QUALITY, 90};
     mjpgs streamer;
-    streamer.start(8080);
+    streamer.start(5802);
 
     int cone_min_hue;
     int cone_max_hue;
