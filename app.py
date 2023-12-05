@@ -3,6 +3,8 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 import subprocess
 import time
 
+ip_addr = "10.25.84.6"
+
 app = Flask(__name__)
 
 app.wsgi_app = ProxyFix(
@@ -20,12 +22,12 @@ def get_mode():
 @app.route("/")
 def default_page():
     set_mode("run")
-    return render_template("index.html", mode = get_mode())
+    return render_template("index.html", mode = get_mode(), ip = ip_addr)
 
 @app.route("/tune")
 def tune():
     set_mode("tune")
-    return render_template("tune-select.html", mode = get_mode());
+    return render_template("tune-select.html", mode = get_mode(), ip = ip_addr);
 
 @app.route("/tune/<page>")
 def cones_or_cubes(page):
@@ -46,7 +48,8 @@ def cones_or_cubes(page):
                                       sat_max = params[3],
                                       val_min = params[4],
                                       val_max = params[5],
-                                      mode = get_mode())
+                                      mode = get_mode(),
+                                      ip = ip_addr)
 
 @app.route("/restart", methods=['POST'])
 def restart_code():
